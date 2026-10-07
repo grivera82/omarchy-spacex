@@ -645,13 +645,9 @@ def play(launch, mode="pip", video=None, liftoff=False, quality="1080", on_fail=
     if mode == "fullscreen":
         args.append("--fs")
     args += ["--", v["url"]]
-    if shutil.which("systemd-run"):
-        # A scope of its own keeps the video alive across shell restarts.
-        args = ["systemd-run", "--user", "--scope", "--quiet", "--collect",
-                "--unit=grivera-spacex-player-%d" % int(time.time() * 1000), "--"] + args
-
     os.makedirs(STATE_DIR, exist_ok=True)
     log = open(PLAYER_LOG, "w")
+    # Its own session keeps the video playing through shell restarts and plugin reloads.
     proc = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
                             start_new_session=True)
     log.close()
