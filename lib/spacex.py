@@ -982,6 +982,12 @@ class Engine:
         l = self.find(lid)
         if not l:
             return False, "launch not found"
+        if not (shutil.which("mpv") and shutil.which("yt-dlp")):
+            # No player: open the webcast page instead.
+            vids = [v for v in l["videos"] if v["url"] == video] or [v for v in l["videos"] if not v.get("stale")]
+            if not vids:
+                return False, "no webcast posted for %s yet" % l["name"]
+            return (True, None) if open_url(vids[0]["url"]) else (False, "no browser launcher found")
         ok, err = play(l, mode or self.config.get("playerMode") or "pip", video, liftoff,
                        self.config.get("quality"), self.player_failed)
         self.player_error = "" if ok else err
