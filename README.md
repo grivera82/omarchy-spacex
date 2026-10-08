@@ -58,6 +58,10 @@ From a keybinding or terminal:
 ~/.config/omarchy/plugins/grivera.spacex/bin/spacex demo off
 ```
 
+## Status for scripts and voice assistants
+
+`omarchy-shell grivera.spacex status` prints a JSON summary: the next launches with countdowns, pads, orbits, boosters and crews, plus recent results. Voice assistants such as [Jarvis](https://github.com/grivera82/omarchy-jarvis) use it to answer questions. It only reads, and works while the widget is in the bar.
+
 ## Requirements
 
 - Python 3 (standard library only)

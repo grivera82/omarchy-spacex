@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell
+import Quickshell.Io
 import qs.Ui
 import qs.Commons
 
@@ -11,6 +12,56 @@ Panel {
   id: root
   moduleName: "grivera.spacex"
   ipcTarget: "grivera.spacex"
+  manageIpc: false
+
+  // Panel commands plus status(), which voice assistants (Jarvis) and scripts
+  // read: `omarchy-shell grivera.spacex status`.
+  IpcHandler {
+    target: root.ipcTarget
+    function open(): void { root.open() }
+    function close(): void { root.close() }
+    function show(): void { root.open() }
+    function hide(): void { root.close() }
+    function toggle(): void { root.toggle() }
+    function status(): string { return JSON.stringify(root.statusSummary()) }
+  }
+
+  function statusTime(ts) { return ts ? Qt.formatDateTime(new Date(ts * 1000), "ddd MMM d, h:mm AP") : "" }
+
+  // The next launches with countdowns, then recent results.
+  function statusSummary() {
+    if (!svc || !launches.length) return { error: "SpaceX Launches is still loading" }
+    var now = Date.now() / 1000
+    function launch(l, done) {
+      var o = { name: l.name, rocket: l.rocket, status: l.status ? l.status.name : "",
+                when: timed(l) ? root.statusTime(l.net) + (l.precision === "rough" ? " (approximate)" : "") : l.netLabel,
+                pad: l.pad ? l.pad.short + ", " + l.pad.place : "" }
+      if (!done && timed(l)) o.countdown = tClock(l)
+      if (l.mission) {
+        if (l.mission.orbit) o.orbit = l.mission.orbit
+        if (l.mission.customers && l.mission.customers.length) o.customer = l.mission.customers.join(", ")
+        if (l.mission.description) o.about = l.mission.description.split(/\r?\n/)[0].slice(0, 220)
+      }
+      if (l.probability >= 0 && l.probability !== null && l.probability !== undefined) o.weatherGoPercent = l.probability
+      var b = boosterSummary(l)
+      if (b) o.booster = b
+      var crew = crewOf(l).map(function(c) { return c.name })
+      if (crew.length) o.crew = crew
+      if (l.webcastLive) o.webcastLive = true
+      if (l.phase === "flight") o.inFlight = true
+      if (l.starlink) o.starlink = true
+      return o
+    }
+    return {
+      now: root.statusTime(now),
+      upcoming: launches.slice(0, 6).map(function(l) { return launch(l, false) }),
+      recent: recent.slice(0, 4).map(function(l) { return launch(l, true) }),
+      launchesThisYear: recent.length && recent[0].yearCount ? recent[0].yearCount : null,
+      successStreak: st.stats ? st.stats.streak : null,
+      playerOpen: !!player.playing
+    }
+  }
+
 
   readonly property var svc: root.bar && root.bar.shell ? root.bar.shell.serviceFor("grivera.spacex") : null
   readonly property var st: svc ? svc.state : ({})

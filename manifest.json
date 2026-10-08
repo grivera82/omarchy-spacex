@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "grivera.spacex",
   "name": "SpaceX Launches",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "grivera",
   "license": "MIT",
   "description": "Upcoming SpaceX launches with a live T-minus countdown in your Omarchy bar. Booster, weather and crew details, the flight timeline as it happens, launch alerts, and the webcast or liftoff replays in a picture-in-picture player.",
