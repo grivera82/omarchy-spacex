@@ -164,6 +164,12 @@ Panel {
 
   // ---- helpers ----
 
+  // Launch Library text goes into StyledText (crew rows) only through this.
+  function esc(t) {
+    return String(t === undefined || t === null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+  }
+
   function pad2(n) { return (n < 10 ? "0" : "") + n }
   function timed(l) { return !!l && (l.precision === "exact" || l.precision === "rough") }
 
@@ -582,6 +588,7 @@ Panel {
           }
 
           Text {
+            textFormat: Text.PlainText
             width: parent.width
             topPadding: Style.space(2)
             wrapMode: Text.WordWrap
@@ -610,6 +617,7 @@ Panel {
       readonly property bool liveNow: !!l && l.phase !== "done" && root.timed(l) && l.net - root.nowSec < 3600 && root.nowSec - l.net < root.flightWindow(l)
 
       Text {
+        textFormat: Text.PlainText
         visible: !parent.l
         width: parent.width
         topPadding: Style.space(24)
@@ -639,6 +647,7 @@ Panel {
           onClicked: root.step(-1)
         }
         Text {
+          textFormat: Text.PlainText
           anchors.centerIn: parent
           text: {
             var l = root.selected
@@ -655,6 +664,7 @@ Panel {
           font.letterSpacing: 1.5
         }
         Text {
+          textFormat: Text.PlainText
           visible: root.selectedId !== ""
           anchors.right: nextBtn.left
           anchors.rightMargin: Style.space(6)
@@ -731,6 +741,7 @@ Panel {
           anchors.margins: Style.space(10)
           spacing: Style.space(2)
           Text {
+            textFormat: Text.PlainText
             text: "LATEST" + (parent.parent.u && parent.parent.u.ts ? "  ·  " + root.agoText(parent.parent.u.ts).toUpperCase() : "")
             color: root.dim
             font.family: root.fontFamily
@@ -769,6 +780,7 @@ Panel {
       }
 
       Text {
+        textFormat: Text.PlainText
         readonly property var sections: root.scheduleSections()
         visible: sections.length === 0
         width: parent.width
@@ -794,6 +806,7 @@ Panel {
             height: dayHeader.implicitHeight + Style.space(8)
             Text {
               id: dayHeader
+              textFormat: Text.PlainText
               anchors.left: parent.left
               anchors.bottom: parent.bottom
               anchors.bottomMargin: Style.space(3)
@@ -805,6 +818,7 @@ Panel {
               font.letterSpacing: 1
             }
             Text {
+              textFormat: Text.PlainText
               anchors.right: parent.right
               anchors.baseline: dayHeader.baseline
               text: modelData.items.length > 1 ? modelData.items.length + " launches" : ""
@@ -829,6 +843,7 @@ Panel {
       }
 
       Text {
+        textFormat: Text.PlainText
         visible: (root.st.hiddenStarlink || 0) > 0
         width: parent.width
         topPadding: Style.space(4)
@@ -840,6 +855,7 @@ Panel {
         font.italic: true
       }
       Text {
+        textFormat: Text.PlainText
         visible: (root.st.pending || 0) > root.launches.length
         width: parent.width
         wrapMode: Text.WordWrap
@@ -881,6 +897,7 @@ Panel {
       }
 
       Text {
+        textFormat: Text.PlainText
         visible: root.recent.length === 0
         width: parent.width
         horizontalAlignment: Text.AlignHCenter
@@ -897,6 +914,7 @@ Panel {
       }
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         wrapMode: Text.WordWrap
         text: "▶ starts the replay 90 seconds before liftoff. Click a launch for its details."
@@ -981,6 +999,7 @@ Panel {
         onChanged: function(v) { if (root.svc) root.svc.setConfig("quality", v) }
       }
       Text {
+        textFormat: Text.PlainText
         visible: !!root.st.tools && (!root.st.tools.mpv || !root.st.tools.ytdlp)
         width: parent.width
         wrapMode: Text.WordWrap
@@ -1011,6 +1030,7 @@ Panel {
         }
       }
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         wrapMode: Text.WordWrap
         text: "Launch Library allows 15 requests an hour; this widget uses at most " + (root.st.requestBudget || 12) + " (" + (root.st.requestsUsed || 0) + " in the last hour)."
@@ -1048,6 +1068,7 @@ Panel {
     opacity: pulsing ? 0.55 + 0.45 * root.pulse : 1
     Text {
       id: pillText
+      textFormat: Text.PlainText
       anchors.centerIn: parent
       text: pill.text
       color: pill.solid ? "#ffffff" : pill.tint
@@ -1072,6 +1093,7 @@ Panel {
       width: parent.width - Style.space(12)
       spacing: Style.space(1)
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         horizontalAlignment: Text.AlignHCenter
         text: parent.parent.value
@@ -1081,6 +1103,7 @@ Panel {
         font.bold: true
       }
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.WordWrap
@@ -1253,6 +1276,7 @@ Panel {
         font.pixelSize: Style.font.bodySmall
       }
       Text {
+        textFormat: Text.PlainText
         visible: !!hero.l.failreason && hero.done
         width: parent.width
         wrapMode: Text.WordWrap
@@ -1262,6 +1286,7 @@ Panel {
         font.pixelSize: Style.font.caption
       }
       Text {
+        textFormat: Text.PlainText
         visible: !hero.done && !!hero.l.status && (hero.l.status.id === 2 || hero.l.status.id === 8 || hero.l.status.id === 5)
         width: parent.width
         wrapMode: Text.WordWrap
@@ -1335,6 +1360,7 @@ Panel {
         onClicked: root.watch(wb.l, wb.done && wb.lift ? { mode: "fullscreen", liftoff: true, video: wb.lift.url } : { mode: "fullscreen" })
       }
       Text {
+        textFormat: Text.PlainText
         visible: !wb.playingThis && !wb.done && wb.fresh.length === 0
         width: parent.width
         anchors.verticalCenter: parent.verticalCenter
@@ -1371,6 +1397,7 @@ Panel {
     }
 
     Text {
+      textFormat: Text.PlainText
       visible: wb.stale.length > 0 && !wb.done
       width: parent.width
       wrapMode: Text.WordWrap
@@ -1434,6 +1461,7 @@ Panel {
       Row {
         spacing: Style.space(6)
         Text {
+          textFormat: Text.PlainText
           text: sr.v.publisher || ""
           color: root.fg
           font.family: root.fontFamily
@@ -1445,6 +1473,7 @@ Panel {
         Pill { visible: !!sr.v.stale; text: "EARLIER ATTEMPT"; tint: root.dim; anchors.verticalCenter: parent.verticalCenter }
       }
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         text: (sr.v.title || sr.v.url) + (sr.v.playable ? "" : "  ·  opens in browser")
         elide: Text.ElideRight
@@ -1455,6 +1484,7 @@ Panel {
     }
     Text {
       id: srIcon
+      textFormat: Text.PlainText
       anchors.right: parent.right
       anchors.rightMargin: Style.space(10)
       anchors.verticalCenter: parent.verticalCenter
@@ -1527,6 +1557,7 @@ Panel {
           anchors.margins: Style.space(10)
           spacing: Style.space(2)
           Text {
+            textFormat: Text.PlainText
             text: tile.modelData.icon + "  " + tile.modelData.label
             color: root.dim
             font.family: root.fontFamily
@@ -1535,6 +1566,7 @@ Panel {
             font.letterSpacing: 1
           }
           Text {
+            textFormat: Text.PlainText
             width: parent.width
             text: tile.modelData.value
             wrapMode: Text.WordWrap
@@ -1546,6 +1578,7 @@ Panel {
             font.bold: true
           }
           Text {
+            textFormat: Text.PlainText
             visible: !!tile.modelData.sub
             width: parent.width
             text: tile.modelData.sub || ""
@@ -1557,6 +1590,7 @@ Panel {
             font.pixelSize: Style.font.caption
           }
           Text {
+            textFormat: Text.PlainText
             visible: !!tile.modelData.sub2
             width: parent.width
             text: tile.modelData.sub2 || ""
@@ -1593,7 +1627,7 @@ Panel {
             id: crewText
             anchors.centerIn: parent
             textFormat: Text.StyledText
-            text: "<b>" + modelData.name + "</b>  <font color='" + root.dim + "'>" + modelData.role + (modelData.agency ? " · " + modelData.agency : "") + "</font>"
+            text: "<b>" + root.esc(modelData.name) + "</b>  <font color='" + root.dim + "'>" + root.esc(modelData.role) + (modelData.agency ? " · " + root.esc(modelData.agency) : "") + "</font>"
             color: root.fg
             font.family: root.fontFamily
             font.pixelSize: Style.font.caption
@@ -1625,6 +1659,7 @@ Panel {
         fontFamily: root.fontFamily
       }
       Text {
+        textFormat: Text.PlainText
         anchors.right: parent.right
         anchors.verticalCenter: tlHead.verticalCenter
         visible: tl.clockRunning
@@ -1658,6 +1693,7 @@ Panel {
         }
         Text {
           id: evTime
+          textFormat: Text.PlainText
           x: Style.space(6)
           width: Style.space(78)
           anchors.verticalCenter: parent.verticalCenter
@@ -1689,6 +1725,7 @@ Panel {
         }
         Text {
           id: evLabel
+          textFormat: Text.PlainText
           anchors.left: dot.right
           anchors.leftMargin: Style.space(10)
           anchors.right: evIn.left
@@ -1707,6 +1744,7 @@ Panel {
         }
         Text {
           id: evIn
+          textFormat: Text.PlainText
           anchors.right: parent.right
           anchors.rightMargin: Style.space(6)
           anchors.verticalCenter: parent.verticalCenter
@@ -1759,6 +1797,7 @@ Panel {
 
     Text {
       id: rowTime
+      textFormat: Text.PlainText
       x: Style.space(10)
       width: Style.space(66)
       anchors.verticalCenter: parent.verticalCenter
@@ -1785,6 +1824,7 @@ Panel {
       opacity: status === Image.Ready ? 1 : 0
     }
     Text {
+      textFormat: Text.PlainText
       anchors.centerIn: rowPatch
       visible: rowPatch.status !== Image.Ready
       text: row.l.starlink ? root.satGlyph : root.rocket
@@ -1838,6 +1878,7 @@ Panel {
         pulsing: !!row.l.webcastLive
       }
       Text {
+        textFormat: Text.PlainText
         anchors.right: parent.right
         visible: root.timed(row.l)
         text: row.l.net > root.nowSec ? root.inText(row.l.net) : root.tClock(row.l, true)
@@ -1885,6 +1926,7 @@ Panel {
       opacity: status === Image.Ready ? 1 : 0
     }
     Text {
+      textFormat: Text.PlainText
       anchors.centerIn: rrPatch
       visible: rrPatch.status !== Image.Ready
       text: rr.l.starlink ? root.satGlyph : root.rocket
@@ -1905,6 +1947,7 @@ Panel {
         spacing: Style.space(6)
         Pill { text: root.statusText(rr.l); tint: root.statusColor(rr.l); anchors.verticalCenter: parent.verticalCenter }
         Text {
+          textFormat: Text.PlainText
           anchors.verticalCenter: parent.verticalCenter
           text: Qt.formatDate(new Date(rr.l.net * 1000), "ddd MMM d").toUpperCase() + "  ·  " + (rr.l.rocket || "").toUpperCase()
           color: root.dim
@@ -1963,6 +2006,7 @@ Panel {
       anchors.verticalCenter: parent.verticalCenter
       spacing: Style.space(8)
       Text {
+        textFormat: Text.PlainText
         anchors.verticalCenter: parent.verticalCenter
         text: root.playGlyph
         color: root.go
@@ -1973,6 +2017,7 @@ Panel {
       Column {
         anchors.verticalCenter: parent.verticalCenter
         Text {
+          textFormat: Text.PlainText
           text: "NOW PLAYING" + (root.player.liftoff ? " · LIFTOFF REPLAY" : "")
           color: root.go
           font.family: root.fontFamily
@@ -1981,6 +2026,7 @@ Panel {
           font.letterSpacing: 1
         }
         Text {
+          textFormat: Text.PlainText
           width: np.width - Style.space(150)
           text: (root.player.name || "") + "  ·  " + (root.player.publisher || "")
           elide: Text.ElideRight
