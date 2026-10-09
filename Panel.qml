@@ -1410,6 +1410,7 @@ Panel {
   }
 
   component LinkText: Text {
+    textFormat: Text.PlainText
     property string url: ""
     signal activated()
     text: ""
@@ -1738,9 +1739,10 @@ Panel {
           font.pixelSize: Style.font.bodySmall
           font.bold: ev.liftoff || ev.current || ev.upNext
           HoverHandler { id: evHover }
-          ToolTip.visible: evHover.hovered && !!ev.modelData.description
-          ToolTip.text: ev.modelData.description
-          ToolTip.delay: 400
+          PanelToolTip {
+            visible: evHover.hovered && !!ev.modelData.description
+            text: ev.modelData.description || ""
+          }
         }
         Text {
           id: evIn
