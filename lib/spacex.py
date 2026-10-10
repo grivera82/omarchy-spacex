@@ -23,7 +23,6 @@ Standard library only.
 
 import concurrent.futures
 import datetime
-import gzip
 import hashlib
 import json
 import os
@@ -37,6 +36,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+import zlib
 
 HOME = os.path.expanduser("~")
 STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.join(HOME, ".local/state"), "grivera-spacex")
@@ -117,22 +117,40 @@ class Throttled(Exception):
         self.wait = wait
 
 
+MAX_BODY = 16 * 1024 * 1024   # feeds run ~1 MB, images are capped at 12 MB below
+MAX_ERROR_BODY = 64 * 1024
+
+
+def gunzip(data, limit):
+    out = zlib.decompressobj(31).decompress(data, limit + 1)
+    if len(out) > limit:
+        raise ValueError("response too large")
+    return out
+
+
+def read_body(r, limit):
+    data = r.read(limit + 1) or b""
+    if len(data) > limit:
+        raise ValueError("response too large")
+    if data[:2] == b"\x1f\x8b":
+        data = gunzip(data, limit)
+    return data
+
+
 def http_get(url, timeout=20):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Encoding": "gzip"})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
-            data = r.read()
+            return read_body(r, MAX_BODY)
     except urllib.error.HTTPError as e:
         if e.code == 429:
-            body = e.read() or b""
-            if body[:2] == b"\x1f\x8b":
-                body = gzip.decompress(body)
+            try:
+                body = read_body(e, MAX_ERROR_BODY)
+            except (OSError, ValueError):
+                body = b""
             m = re.search(rb"available in (\d+)", body)
             raise Throttled(int(m.group(1)) if m else 900)
         raise
-    if data[:2] == b"\x1f\x8b":
-        data = gzip.decompress(data)
-    return data
 
 
 def parse_ts(s):
