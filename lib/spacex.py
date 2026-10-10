@@ -708,7 +708,9 @@ class Notifier:
                 args += ["-A", "%s=%s" % (name, label)]
         if key in self.ids:
             args += ["-r", str(self.ids[key])]
-        args += [summary, body]
+        # "--" so Launch Library text starting with "-" can't be read as an
+        # option (an injected -h could add an omarchy-exec-argv hint).
+        args += ["--", summary, body]
 
         def run():
             try:
