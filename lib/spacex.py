@@ -30,11 +30,13 @@ import re
 import shutil
 import signal
 import socket
+import string
 import subprocess
 import sys
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import zlib
 
@@ -121,6 +123,48 @@ MAX_BODY = 16 * 1024 * 1024   # feeds run ~1 MB, images are capped at 12 MB belo
 MAX_ERROR_BODY = 64 * 1024
 
 
+class BodylessRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Follow HTTP redirects without buffering their untrusted response bodies."""
+
+    def http_error_302(self, req, fp, code, msg, headers):
+        try:
+            location = (headers.get("location") or headers.get("Location")
+                        or headers.get("uri") or headers.get("URI"))
+            if not location:
+                return None
+            parts = urllib.parse.urlparse(location)
+            if parts.scheme not in ("", "http", "https"):
+                raise ValueError("unsupported redirect scheme")
+            if not parts.path and parts.netloc:
+                parts = parts._replace(path="/")
+            location = urllib.parse.quote(
+                urllib.parse.urlunparse(parts), encoding="iso-8859-1", safe=string.punctuation
+            )
+            newurl = urllib.parse.urljoin(req.full_url, location)
+            if urllib.parse.urlparse(req.full_url).scheme == "https" and urllib.parse.urlparse(newurl).scheme != "https":
+                raise ValueError("insecure redirect")
+            new = self.redirect_request(req, fp, code, msg, headers, newurl)
+            if new is None:
+                return None
+            if hasattr(req, "redirect_dict"):
+                visited = new.redirect_dict = req.redirect_dict
+                if visited.get(newurl, 0) >= self.max_repeats or len(visited) >= self.max_redirections:
+                    raise ValueError("too many redirects")
+            else:
+                visited = new.redirect_dict = req.redirect_dict = {}
+            visited[newurl] = visited.get(newurl, 0) + 1
+        finally:
+            # urllib's default handler calls fp.read() here. A streaming 30x
+            # body can exhaust memory or stall forever; no body is needed.
+            fp.close()
+        return self.parent.open(new, timeout=req.timeout)
+
+    http_error_301 = http_error_303 = http_error_307 = http_error_308 = http_error_302
+
+
+HTTP_OPENER = urllib.request.build_opener(BodylessRedirectHandler)
+
+
 def gunzip(data, limit):
     out = zlib.decompressobj(31).decompress(data, limit + 1)
     if len(out) > limit:
@@ -140,7 +184,7 @@ def read_body(r, limit):
 def http_get(url, timeout=20):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Encoding": "gzip"})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with HTTP_OPENER.open(req, timeout=timeout) as r:
             return read_body(r, MAX_BODY)
     except urllib.error.HTTPError as e:
         if e.code == 429:
