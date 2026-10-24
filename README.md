@@ -1,5 +1,9 @@
 # SpaceX Launches (grivera.spacex)
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Omarchy plugin marketplace](https://img.shields.io/badge/Omarchy-plugin%20marketplace-2f6f4f.svg)](https://plugins.omarchy.org/plugin.html?id=grivera.spacex)
+
+> Part of the [Omarchy plugin marketplace](https://plugins.omarchy.org/plugin.html?id=grivera.spacex), listed as **SpaceX Launches** (plugin ID `grivera.spacex`). The marketplace registry lives at [omacom/omarchy-plugin-marketplace](https://github.com/omacom/omarchy-plugin-marketplace).
+
 Every upcoming SpaceX launch in your Omarchy bar: a live T-minus countdown, booster, weather and crew details, the flight timeline lighting up event by event, launch alerts, and the webcast in a picture-in-picture window. Replays of recent launches start 90 seconds before liftoff.
 
 ![SpaceX Launches: countdown, live mission clock and flight timeline, launch schedule, and recent results, plus the bar countdown](preview.png)
@@ -31,6 +35,18 @@ rm -rf ~/.cache/grivera-spacex ~/.local/state/grivera-spacex   # optional: cache
 ```
 
 The plugin never changes your Omarchy or Hyprland configuration. It only writes to the folders listed under [Files](#files).
+
+### Manual install
+
+To install without the plugin manager, clone the repository into Omarchy's
+plugin folder, check it with Omarchy's validator, then rescan and enable it:
+
+```
+git clone https://github.com/grivera82/omarchy-spacex.git ~/.config/omarchy/plugins/grivera.spacex
+omarchy plugin validate ~/.config/omarchy/plugins/grivera.spacex
+omarchy-shell shell rescanPlugins
+omarchy plugin enable grivera.spacex --section right
+```
 
 ## What it does
 
@@ -88,4 +104,4 @@ Launch data, images and webcast links come from [The Space Devs](https://thespac
 
 ## License
 
-MIT
+[MIT](LICENSE)
